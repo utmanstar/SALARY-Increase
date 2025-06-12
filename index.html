@@ -62,6 +62,9 @@
         .button-group {
             text-align: center;
             margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px; /* Space between buttons */
         }
         .button-group button {
             background-color: #007bff;
@@ -75,6 +78,12 @@
         }
         .button-group button:hover {
             background-color: #0056b3;
+        }
+        .button-group button.clear-button {
+            background-color: #dc3545; /* Red for clear button */
+        }
+        .button-group button.clear-button:hover {
+            background-color: #c82333;
         }
         .results {
             margin-top: 30px;
@@ -97,15 +106,36 @@
         .results p strong {
             color: #007bff;
         }
+        .tax-breakdown {
+            margin-top: 20px;
+            border-top: 1px dashed #ccc;
+            padding-top: 15px;
+        }
+        .tax-breakdown h4 {
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .tax-breakdown ul {
+            list-style: none;
+            padding: 0;
+        }
+        .tax-breakdown ul li {
+            background-color: #f8f9fa;
+            border: 1px solid #eee;
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
         .footer {
             margin-top: 40px;
             text-align: center;
-            color: #666;
-            font-size: 14px;
+            color: #444; /* Slightly darker than 666 for better contrast */
+            font-size: 16px; /* Slightly larger */
+            font-weight: bold; /* Make it bold */
         }
     </style>
 </head>
-<body>
+<body onload="loadSavedData()">
     <div class="header">
         Salary Increase and Tax Calculator 2025
     </div>
@@ -114,15 +144,15 @@
         <h2>Enter Your Salary Details</h2>
         <div class="form-group">
             <label for="grossSalary">Gross Monthly Salary (Rs.):</label>
-            <input type="number" id="grossSalary" placeholder="e.g., 150000" required>
+            <input type="number" id="grossSalary" placeholder="e.g., 150000" required onkeyup="saveInput('grossSalary')">
         </div>
         <div class="form-group">
             <label for="basicSalary">Basic Monthly Salary (Rs.):</label>
-            <input type="number" id="basicSalary" placeholder="e.g., 100000" required>
+            <input type="number" id="basicSalary" placeholder="e.g., 100000" required onkeyup="saveInput('basicSalary')">
         </div>
         <div class="form-group">
             <label for="payScale">Pay Scale:</label>
-            <select id="payScale" required>
+            <select id="payScale" required onchange="saveInput('payScale')">
                 <option value="">Select Pay Scale</option>
                 <script>
                     for (let i = 1; i <= 22; i++) {
@@ -132,12 +162,13 @@
             </select>
         </div>
         <div class="checkbox-group">
-            <input type="checkbox" id="isTeacher">
+            <input type="checkbox" id="isTeacher" onchange="saveInput('isTeacher')">
             <label for="isTeacher">Are you a Teacher?</label>
         </div>
 
         <div class="button-group">
             <button onclick="calculate()">Calculate</button>
+            <button class="clear-button" onclick="clearAll()">Clear</button>
         </div>
 
         <div class="results" id="results">
@@ -149,6 +180,40 @@
     </div>
 
     <script>
+        // Function to save input to local storage
+        function saveInput(id) {
+            const element = document.getElementById(id);
+            if (element.type === 'checkbox') {
+                localStorage.setItem(id, element.checked);
+            } else {
+                localStorage.setItem(id, element.value);
+            }
+        }
+
+        // Function to load saved data from local storage
+        function loadSavedData() {
+            const grossSalary = localStorage.getItem('grossSalary');
+            const basicSalary = localStorage.getItem('basicSalary');
+            const payScale = localStorage.getItem('payScale');
+            const isTeacher = localStorage.getItem('isTeacher');
+
+            if (grossSalary) document.getElementById('grossSalary').value = grossSalary;
+            if (basicSalary) document.getElementById('basicSalary').value = basicSalary;
+            if (payScale) document.getElementById('payScale').value = payScale;
+            if (isTeacher !== null) document.getElementById('isTeacher').checked = (isTeacher === 'true');
+        }
+
+        // Function to clear all inputs and results
+        function clearAll() {
+            document.getElementById('grossSalary').value = '';
+            document.getElementById('basicSalary').value = '';
+            document.getElementById('payScale').value = '';
+            document.getElementById('isTeacher').checked = false;
+            document.getElementById('results').innerHTML = '';
+            localStorage.clear(); // Clear all saved data
+        }
+
+
         function calculate() {
             const grossSalaryInput = document.getElementById('grossSalary');
             const basicSalaryInput = document.getElementById('basicSalary');
@@ -178,21 +243,114 @@
 
             const newGrossSalary = grossSalary + salaryIncrease;
 
-            // Monthly Tax Calculation (before rebate)
+            // Monthly Tax Calculation with breakdown
+            let taxableIncome = newGrossSalary;
             let monthlyTaxBeforeRebate = 0;
-            if (newGrossSalary <= 50000) {
-                monthlyTaxBeforeRebate = 0;
-            } else if (newGrossSalary <= 100000) {
-                monthlyTaxBeforeRebate = 0.01 * (newGrossSalary - 50000); // 1% of amount above Rs50,000
-            } else if (newGrossSalary <= 183333) {
-                monthlyTaxBeforeRebate = 500 + 0.11 * (newGrossSalary - 100000); // Rs500 + 11pc of amount above Rs100,000
-            } else if (newGrossSalary <= 266667) {
-                monthlyTaxBeforeRebate = 9677 + 0.23 * (newGrossSalary - 183333); // Rs9,677 + 23pc of amount above Rs183,333
-            } else if (newGrossSalary <= 341667) {
-                monthlyTaxBeforeRebate = 28833 + 0.30 * (newGrossSalary - 266667); // Rs28,833 + 30pc of amount exceeding Rs266,667
-            } else { // newGrossSalary >= 341668
-                monthlyTaxBeforeRebate = 51333 + 0.35 * (newGrossSalary - 341667); // Rs51,333 + 35pc of amount exceeding Rs341,667
+            let taxBreakdownHtml = '<h4>Monthly Tax Breakdown:</h4><ul>';
+
+            // Define tax slabs in an array for easier iteration
+            const taxSlabs = [
+                { limit: 50000, rate: 0, fixed: 0, baseTax: 0, description: "No tax" },
+                { limit: 100000, rate: 0.01, fixed: 0, baseTax: 0, prevLimit: 50000, description: "1% of amount above Rs50,000" },
+                { limit: 183333, rate: 0.11, fixed: 500, baseTax: 500, prevLimit: 100000, description: "Rs500 + 11pc of amount above Rs100,000" },
+                { limit: 266667, rate: 0.23, fixed: 9677, baseTax: 9677, prevLimit: 183333, description: "Rs9,677 + 23pc of amount above Rs183,333" },
+                { limit: 341667, rate: 0.30, fixed: 28833, baseTax: 28833, prevLimit: 266667, description: "Rs28,833 + 30pc of amount exceeding Rs266,667" },
+                { limit: Infinity, rate: 0.35, fixed: 51333, baseTax: 51333, prevLimit: 341667, description: "Rs51,333 + 35pc of amount exceeding Rs341,667" }
+            ];
+
+            let remainingIncome = newGrossSalary;
+
+            for (let i = 0; i < taxSlabs.length; i++) {
+                const slab = taxSlabs[i];
+                const lowerBound = slab.prevLimit || 0;
+                const upperBound = slab.limit;
+
+                if (remainingIncome > lowerBound) {
+                    let incomeInThisSlab = 0;
+                    let taxInThisSlab = 0;
+
+                    // Calculate tax for the portion of income within this slab
+                    if (newGrossSalary <= upperBound) { // If total salary falls within or below this slab
+                        incomeInThisSlab = newGrossSalary - lowerBound;
+                        taxInThisSlab = slab.baseTax + (incomeInThisSlab * slab.rate);
+                        monthlyTaxBeforeRebate = taxInThisSlab; // This is the total tax
+                        taxBreakdownHtml += `<li>Rs.${Math.round(incomeInThisSlab).toLocaleString()} at ${Math.round(slab.rate * 100)}% (Total calculated: Rs.${Math.round(monthlyTaxBeforeRebate).toLocaleString()})</li>`;
+                        break; // All remaining income taxed
+                    } else { // If total salary exceeds this slab, tax the full slab
+                        incomeInThisSlab = upperBound - lowerBound;
+                        // Calculate tax for this specific slab portion only if income is above its lower bound
+                        if (newGrossSalary > lowerBound) {
+                            taxInThisSlab = (upperBound - lowerBound) * slab.rate;
+                            monthlyTaxBeforeRebate += taxInThisSlab;
+                            taxBreakdownHtml += `<li>Rs.${Math.round(incomeInThisSlab).toLocaleString()} at ${Math.round(slab.rate * 100)}% (Cumulative tax: Rs.${Math.round(monthlyTaxBeforeRebate).toLocaleString()})</li>`;
+                        }
+                    }
+                }
             }
+            taxBreakdownHtml += '</ul>';
+
+            // Correct the base tax calculation for slabs
+            // Recalculate monthlyTaxBeforeRebate by applying fixed amounts and rates for each slab
+            monthlyTaxBeforeRebate = 0;
+            if (newGrossSalary > 50000) {
+                monthlyTaxBeforeRebate += Math.max(0, (Math.min(newGrossSalary, 100000) - 50000) * 0.01);
+                if (newGrossSalary > 100000) {
+                    monthlyTaxBeforeRebate += 500; // Base tax for Rs. 100,000 slab
+                    monthlyTaxBeforeRebate += Math.max(0, (Math.min(newGrossSalary, 183333) - 100000) * 0.11);
+                }
+                if (newGrossSalary > 183333) {
+                    monthlyTaxBeforeRebate += 9677 - 500; // Adjust base tax for Rs. 183,333 slab
+                    monthlyTaxBeforeRebate += Math.max(0, (Math.min(newGrossSalary, 266667) - 183333) * 0.23);
+                }
+                if (newGrossSalary > 266667) {
+                    monthlyTaxBeforeRebate += 28833 - 9677; // Adjust base tax for Rs. 266,667 slab
+                    monthlyTaxBeforeRe rebate += Math.max(0, (Math.min(newGrossSalary, 341667) - 266667) * 0.30);
+                }
+                if (newGrossSalary > 341667) {
+                    monthlyTaxBeforeRebate += 51333 - 28833; // Adjust base tax for Rs. 341,667 slab
+                    monthlyTaxBeforeRebate += Math.max(0, (newGrossSalary - 341667) * 0.35);
+                }
+            }
+
+            // Re-generate breakdown based on corrected calculation (for clarity)
+            taxBreakdownHtml = '<h4>Monthly Tax Breakdown:</h4><ul>';
+            let cumulativeTax = 0;
+            if (newGrossSalary > 50000) {
+                let incomeInThisSlab = Math.max(0, Math.min(newGrossSalary, 100000) - 50000);
+                let tax = incomeInThisSlab * 0.01;
+                cumulativeTax += tax;
+                if (incomeInThisSlab > 0) taxBreakdownHtml += `<li>Income Rs.${Math.round(incomeInThisSlab).toLocaleString()} @ 1%: Rs.${Math.round(tax).toLocaleString()} (Total: Rs.${Math.round(cumulativeTax).toLocaleString()})</li>`;
+
+                if (newGrossSalary > 100000) {
+                    let baseTax = 500;
+                    incomeInThisSlab = Math.max(0, Math.min(newGrossSalary, 183333) - 100000);
+                    tax = incomeInThisSlab * 0.11;
+                    cumulativeTax += baseTax + tax;
+                    taxBreakdownHtml += `<li>Base Tax Rs.${Math.round(baseTax).toLocaleString()} + Income Rs.${Math.round(incomeInThisSlab).toLocaleString()} @ 11%: Rs.${Math.round(baseTax + tax).toLocaleString()} (Total: Rs.${Math.round(cumulativeTax).toLocaleString()})</li>`;
+                }
+                if (newGrossSalary > 183333) {
+                    let baseTax = 9677;
+                    incomeInThisSlab = Math.max(0, Math.min(newGrossSalary, 266667) - 183333);
+                    tax = incomeInThisSlab * 0.23;
+                    cumulativeTax += (baseTax - (500 + (83333 * 0.11))) + tax; // Adjust for prev slab tax already added
+                    taxBreakdownHtml += `<li>Base Tax Rs.${Math.round(baseTax).toLocaleString()} + Income Rs.${Math.round(incomeInThisSlab).toLocaleString()} @ 23%: Rs.${Math.round((baseTax - (500 + (83333 * 0.11))) + tax).toLocaleString()} (Total: Rs.${Math.round(cumulativeTax).toLocaleString()})</li>`;
+                }
+                 if (newGrossSalary > 266667) {
+                    let baseTax = 28833;
+                    incomeInThisSlab = Math.max(0, Math.min(newGrossSalary, 341667) - 266667);
+                    tax = incomeInThisSlab * 0.30;
+                    cumulativeTax += (baseTax - (9677 + (83334 * 0.23))) + tax; // Adjust for prev slab tax already added
+                    taxBreakdownHtml += `<li>Base Tax Rs.${Math.round(baseTax).toLocaleString()} + Income Rs.${Math.round(incomeInThisSlab).toLocaleString()} @ 30%: Rs.${Math.round((baseTax - (9677 + (83334 * 0.23))) + tax).toLocaleString()} (Total: Rs.${Math.round(cumulativeTax).toLocaleString()})</li>`;
+                }
+                 if (newGrossSalary > 341667) {
+                    let baseTax = 51333;
+                    incomeInThisSlab = Math.max(0, newGrossSalary - 341667);
+                    tax = incomeInThisSlab * 0.35;
+                    cumulativeTax += (baseTax - (28833 + (75000 * 0.30))) + tax; // Adjust for prev slab tax already added
+                    taxBreakdownHtml += `<li>Base Tax Rs.${Math.round(baseTax).toLocaleString()} + Income Rs.${Math.round(incomeInThisSlab).toLocaleString()} @ 35%: Rs.${Math.round((baseTax - (28833 + (75000 * 0.30))) + tax).toLocaleString()} (Total: Rs.${Math.round(cumulativeTax).toLocaleString()})</li>`;
+                }
+            }
+            taxBreakdownHtml += '</ul>';
 
             let finalMonthlyTax = monthlyTaxBeforeRebate;
             let teacherRebateAmount = 0;
@@ -225,6 +383,9 @@
                     <p>Yearly Tax Deduction: <strong>Rs. ${Math.round(finalYearlyTax).toLocaleString()}</strong></p>
                 `;
             }
+
+            // Append tax breakdown
+            resultsHtml += `<div class="tax-breakdown">${taxBreakdownHtml}</div>`;
 
             resultsDiv.innerHTML = resultsHtml;
         }

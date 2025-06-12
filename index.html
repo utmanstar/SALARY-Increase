@@ -50,6 +50,15 @@
             -webkit-appearance: none;
             margin: 0;
         }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
         .button-group {
             text-align: center;
             margin-top: 20px;
@@ -122,6 +131,10 @@
                 </script>
             </select>
         </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="isTeacher">
+            <label for="isTeacher">Are you a Teacher?</label>
+        </div>
 
         <div class="button-group">
             <button onclick="calculate()">Calculate</button>
@@ -140,11 +153,13 @@
             const grossSalaryInput = document.getElementById('grossSalary');
             const basicSalaryInput = document.getElementById('basicSalary');
             const payScaleInput = document.getElementById('payScale');
+            const isTeacherCheckbox = document.getElementById('isTeacher');
             const resultsDiv = document.getElementById('results');
 
             const grossSalary = parseFloat(grossSalaryInput.value);
             const basicSalary = parseFloat(basicSalaryInput.value);
             const payScale = parseInt(payScaleInput.value);
+            const isTeacher = isTeacherCheckbox.checked;
 
             if (isNaN(grossSalary) || isNaN(basicSalary) || isNaN(payScale)) {
                 resultsDiv.innerHTML = '<p style="color: red;">Please enter valid numeric values for all fields.</p>';
@@ -163,31 +178,54 @@
 
             const newGrossSalary = grossSalary + salaryIncrease;
 
-            // Monthly Tax Calculation
-            let monthlyTax = 0;
+            // Monthly Tax Calculation (before rebate)
+            let monthlyTaxBeforeRebate = 0;
             if (newGrossSalary <= 50000) {
-                monthlyTax = 0;
+                monthlyTaxBeforeRebate = 0;
             } else if (newGrossSalary <= 100000) {
-                monthlyTax = 0.01 * (newGrossSalary - 50000); // 1% of amount above Rs50,000
+                monthlyTaxBeforeRebate = 0.01 * (newGrossSalary - 50000); // 1% of amount above Rs50,000
             } else if (newGrossSalary <= 183333) {
-                monthlyTax = 500 + 0.11 * (newGrossSalary - 100000); // Rs500 + 11pc of amount above Rs100,000
+                monthlyTaxBeforeRebate = 500 + 0.11 * (newGrossSalary - 100000); // Rs500 + 11pc of amount above Rs100,000
             } else if (newGrossSalary <= 266667) {
-                monthlyTax = 9677 + 0.23 * (newGrossSalary - 183333); // Rs9,677 + 23pc of amount above Rs183,333
+                monthlyTaxBeforeRebate = 9677 + 0.23 * (newGrossSalary - 183333); // Rs9,677 + 23pc of amount above Rs183,333
             } else if (newGrossSalary <= 341667) {
-                monthlyTax = 28833 + 0.30 * (newGrossSalary - 266667); // Rs28,833 + 30pc of amount exceeding Rs266,667
+                monthlyTaxBeforeRebate = 28833 + 0.30 * (newGrossSalary - 266667); // Rs28,833 + 30pc of amount exceeding Rs266,667
             } else { // newGrossSalary >= 341668
-                monthlyTax = 51333 + 0.35 * (newGrossSalary - 341667); // Rs51,333 + 35pc of amount exceeding Rs341,667
+                monthlyTaxBeforeRebate = 51333 + 0.35 * (newGrossSalary - 341667); // Rs51,333 + 35pc of amount exceeding Rs341,667
             }
 
-            const yearlyTax = monthlyTax * 12;
+            let finalMonthlyTax = monthlyTaxBeforeRebate;
+            let teacherRebateAmount = 0;
 
-            resultsDiv.innerHTML = `
+            if (isTeacher) {
+                teacherRebateAmount = 0.25 * monthlyTaxBeforeRebate; // 25% rebate
+                finalMonthlyTax = monthlyTaxBeforeRebate - teacherRebateAmount;
+                if (finalMonthlyTax < 0) finalMonthlyTax = 0; // Ensure tax doesn't go negative
+            }
+
+            const finalYearlyTax = finalMonthlyTax * 12;
+
+            let resultsHtml = `
                 <h3>Calculation Results:</h3>
                 <p>Salary Increase: <strong>Rs. ${salaryIncrease.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
                 <p>New Gross Monthly Salary: <strong>Rs. ${newGrossSalary.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
-                <p>Monthly Tax Deduction: <strong>Rs. ${monthlyTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
-                <p>Yearly Tax Deduction: <strong>Rs. ${yearlyTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+                <p>Monthly Tax Deduction (Before Rebate): <strong>Rs. ${monthlyTaxBeforeRebate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
             `;
+
+            if (isTeacher) {
+                resultsHtml += `
+                    <p style="color: green;">Teacher's Tax Rebate (25%): <strong>Rs. ${teacherRebateAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+                    <p><strong>New Monthly Tax for Teacher:</strong> <strong>Rs. ${finalMonthlyTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+                    <p><strong>New Yearly Tax for Teacher:</strong> <strong>Rs. ${finalYearlyTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+                `;
+            } else {
+                resultsHtml += `
+                    <p>Monthly Tax Deduction: <strong>Rs. ${finalMonthlyTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+                    <p>Yearly Tax Deduction: <strong>Rs. ${finalYearlyTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+                `;
+            }
+
+            resultsDiv.innerHTML = resultsHtml;
         }
     </script>
 </body>

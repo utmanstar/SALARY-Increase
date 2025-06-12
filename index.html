@@ -18,21 +18,15 @@
             text-align: center;
             font-size: 24px;
             margin-bottom: 20px;
-            display: flex; /* Added for logo alignment */
-            align-items: center; /* Vertically align items */
-            justify-content: center; /* Center content horizontally */
-            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
         }
-        .header img {
-            height: 50px; /* Adjust as needed for your logo size */
-            margin-right: 15px; /* Space between logo and text */
-            /* You might want to add a max-width if your logo is very wide */
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
         }
-        .header h1 { /* Added to style the text specifically if needed */
-            margin: 0; /* Remove default margin from h1 */
-            font-size: 24px; /* Ensure font size remains */
-        }
-
         .container {
             background-color: white;
             padding: 30px;
@@ -54,10 +48,7 @@
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .form-group input[type="number"] {
-            -moz-appearance: textfield; /* Firefox */
+            box-sizing: border;
         }
         .form-group input::-webkit-outer-spin-button,
         .form-group input::-webkit-inner-spin-button {
@@ -69,7 +60,7 @@
             align-items: center;
             margin-bottom: 15px;
         }
-        .checkbox-group input[type="checkbox"] {
+        .checkbox-group input {
             width: auto;
             margin-right: 10px;
         }
@@ -78,7 +69,7 @@
             margin-top: 20px;
             display: flex;
             justify-content: center;
-            gap: 15px; /* Space between buttons */
+            gap: 15px;
         }
         .button-group button {
             background-color: #007bff;
@@ -94,7 +85,7 @@
             background-color: #0056b3;
         }
         .button-group button.clear-button {
-            background-color: #dc3545; /* Red for clear button */
+            background-color: #dc3545;
         }
         .button-group button.clear-button:hover {
             background-color: #c82333;
@@ -146,12 +137,49 @@
             color: #444;
             font-size: 16px;
             font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            /* Added for scrolling text */
+            overflow: hidden; /* Hide overflow content */
+            white-space: nowrap; /* Prevent text from wrapping */
+            position: relative; /* Needed for absolute positioning of text if desired, or just for context */
+            padding: 10px 0; /* Add some padding to footer */
+        }
+        .footer img {
+            height: 60px; /* Increased logo size */
+        }
+
+        /* Styles for the sliding credits */
+        .sliding-text-container {
+            width: 100%; /* Ensure container takes full width of footer */
+            overflow: hidden; /* Hide anything outside this container */
+            position: relative;
+        }
+
+        .sliding-credits {
+            display: inline-block; /* Essential for animation */
+            padding-left: 100%; /* Start the text off-screen to the right */
+            animation: slide-left 20s linear infinite; /* Adjust duration as needed */
+        }
+
+        @keyframes slide-left {
+            0% {
+                transform: translateX(0%); /* Start at the initial padding-left (effectively right of container) */
+            }
+            100% {
+                transform: translateX(-200%); /* Move text completely off-screen to the left (adjust if text is very long) */
+            }
+        }
+        /* Optional: Pause animation on hover */
+        .sliding-credits:hover {
+            animation-play-state: paused;
         }
     </style>
 </head>
 <body onload="loadSavedData()">
     <div class="header">
-        <img src="ghs2.png" alt="GHS2 Logo">
         <h1>Salary Increase and Tax Calculator 2025</h1>
     </div>
 
@@ -191,7 +219,10 @@
     </div>
 
     <div class="footer">
-        Designed by "KHURRAM IRSHAD KHAN SST(IT) GHS Sector No. 2, KTS Haripur"
+        <div class="sliding-text-container">
+            <span class="sliding-credits">Designed by "KHURRAM IRSHAD KHAN SST(IT) GHS Sector No. 2, KTS Haripur"</span>
+        </div>
+        <img src="ghs2.png" alt="GHS2 Logo">
     </div>
 
     <script>

@@ -48,7 +48,7 @@
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box; /* Changed from 'border' to 'border-box' */
+            box-sizing: border-box;
         }
         .form-group input::-webkit-outer-spin-button,
         .form-group input::-webkit-inner-spin-button {
@@ -172,6 +172,9 @@
             display: inline-block;
             padding-left: 100%; /* Start the text off-screen to the right */
             animation: slide-left 20s linear infinite; /* Adjust duration as needed */
+            /* --- Updated Styles for Larger and Bold Text --- */
+            font-size: 1.1em; /* Make text slightly larger than default */
+            font-weight: bold; /* Make text bold */
         }
 
         @keyframes slide-left {
@@ -207,6 +210,9 @@
                 position: relative; /* Revert to relative for better flow on small screens */
                 transform: none; /* Remove transform for easier vertical centering */
                 top: auto;
+            }
+            .sliding-credits {
+                font-size: 1em; /* Adjust font size slightly for small screens if needed */
             }
         }
     </style>

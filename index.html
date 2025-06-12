@@ -205,23 +205,24 @@
 
             const finalYearlyTax = finalMonthlyTax * 12;
 
+            // Use Math.round() for all monetary figures before displaying
             let resultsHtml = `
                 <h3>Calculation Results:</h3>
-                <p>Salary Increase: <strong>Rs. ${salaryIncrease.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
-                <p>New Gross Monthly Salary: <strong>Rs. ${newGrossSalary.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
-                <p>Monthly Tax Deduction (Before Rebate): <strong>Rs. ${monthlyTaxBeforeRebate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+                <p>Salary Increase: <strong>Rs. ${Math.round(salaryIncrease).toLocaleString()}</strong></p>
+                <p>New Gross Monthly Salary: <strong>Rs. ${Math.round(newGrossSalary).toLocaleString()}</strong></p>
+                <p>Monthly Tax Deduction (Before Rebate): <strong>Rs. ${Math.round(monthlyTaxBeforeRebate).toLocaleString()}</strong></p>
             `;
 
             if (isTeacher) {
                 resultsHtml += `
-                    <p style="color: green;">Teacher's Tax Rebate (25%): <strong>Rs. ${teacherRebateAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
-                    <p><strong>New Monthly Tax for Teacher:</strong> <strong>Rs. ${finalMonthlyTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
-                    <p><strong>New Yearly Tax for Teacher:</strong> <strong>Rs. ${finalYearlyTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+                    <p style="color: green;">Teacher's Tax Rebate (25%): <strong>Rs. ${Math.round(teacherRebateAmount).toLocaleString()}</strong></p>
+                    <p><strong>New Monthly Tax for Teacher:</strong> <strong>Rs. ${Math.round(finalMonthlyTax).toLocaleString()}</strong></p>
+                    <p><strong>New Yearly Tax for Teacher:</strong> <strong>Rs. ${Math.round(finalYearlyTax).toLocaleString()}</strong></p>
                 `;
             } else {
                 resultsHtml += `
-                    <p>Monthly Tax Deduction: <strong>Rs. ${finalMonthlyTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
-                    <p>Yearly Tax Deduction: <strong>Rs. ${finalYearlyTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+                    <p>Monthly Tax Deduction: <strong>Rs. ${Math.round(finalMonthlyTax).toLocaleString()}</strong></p>
+                    <p>Yearly Tax Deduction: <strong>Rs. ${Math.round(finalYearlyTax).toLocaleString()}</strong></p>
                 `;
             }
 

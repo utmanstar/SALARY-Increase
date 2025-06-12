@@ -48,7 +48,7 @@
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border;
+            box-sizing: border-box; /* Changed from 'border' to 'border-box' */
         }
         .form-group input::-webkit-outer-spin-button,
         .form-group input::-webkit-inner-spin-button {
@@ -131,50 +131,83 @@
             margin-bottom: 5px;
             border-radius: 4px;
         }
+
+        /* --- Footer Styles --- */
         .footer {
             margin-top: 40px;
             text-align: center;
-            color: #444;
-            font-size: 16px;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            /* Added for scrolling text */
-            overflow: hidden; /* Hide overflow content */
-            white-space: nowrap; /* Prevent text from wrapping */
-            position: relative; /* Needed for absolute positioning of text if desired, or just for context */
-            padding: 10px 0; /* Add some padding to footer */
-        }
-        .footer img {
-            height: 60px; /* Increased logo size */
+            padding: 15px 20px; /* Added padding to the footer */
+            background-color: #e0e0e0; /* Light grey background for the whole footer */
+            border-radius: 8px;
+            display: flex; /* Use flexbox for layout */
+            align-items: center; /* Vertically align items */
+            justify-content: space-between; /* Space between bulletin box and logo */
+            gap: 20px; /* Space between bulletin box and logo */
         }
 
-        /* Styles for the sliding credits */
+        .bulletin-box {
+            background-color: #28a745; /* Green color for the bulletin box */
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            flex-grow: 1; /* Allows this box to take up available space */
+            height: 40px; /* Fixed height for the bulletin box */
+            display: flex; /* To center the text vertically */
+            align-items: center; /* Center text vertically */
+            overflow: hidden; /* Hide overflow content for sliding effect */
+            position: relative; /* For absolute positioning if needed */
+        }
+
         .sliding-text-container {
-            width: 100%; /* Ensure container takes full width of footer */
-            overflow: hidden; /* Hide anything outside this container */
-            position: relative;
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap; /* Prevent text from wrapping */
+            position: absolute; /* Position relative to .bulletin-box */
+            left: 0;
+            top: 50%; /* Center vertically */
+            transform: translateY(-50%); /* Adjust for exact vertical center */
         }
 
         .sliding-credits {
-            display: inline-block; /* Essential for animation */
+            display: inline-block;
             padding-left: 100%; /* Start the text off-screen to the right */
             animation: slide-left 20s linear infinite; /* Adjust duration as needed */
         }
 
         @keyframes slide-left {
             0% {
-                transform: translateX(0%); /* Start at the initial padding-left (effectively right of container) */
+                transform: translateX(0%);
             }
             100% {
-                transform: translateX(-200%); /* Move text completely off-screen to the left (adjust if text is very long) */
+                transform: translateX(-100%); /* Adjust to ensure text fully exits */
             }
         }
         /* Optional: Pause animation on hover */
         .sliding-credits:hover {
             animation-play-state: paused;
+        }
+
+        .footer-logo img {
+            height: 70px; /* Increased logo size for visibility */
+            flex-shrink: 0; /* Prevent logo from shrinking */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .footer {
+                flex-direction: column; /* Stack items vertically on smaller screens */
+                gap: 15px;
+                padding: 15px;
+            }
+            .bulletin-box {
+                width: 100%; /* Take full width when stacked */
+                margin-right: 0; /* Remove right margin */
+            }
+            .sliding-text-container {
+                position: relative; /* Revert to relative for better flow on small screens */
+                transform: none; /* Remove transform for easier vertical centering */
+                top: auto;
+            }
         }
     </style>
 </head>
@@ -219,10 +252,14 @@
     </div>
 
     <div class="footer">
-        <div class="sliding-text-container">
-            <span class="sliding-credits">Designed by "KHURRAM IRSHAD KHAN SST(IT) GHS Sector No. 2, KTS Haripur"</span>
+        <div class="bulletin-box">
+            <div class="sliding-text-container">
+                <span class="sliding-credits">Designed by "KHURRAM IRSHAD KHAN SST(IT) GHS Sector No. 2, KTS Haripur"</span>
+            </div>
         </div>
-        <img src="ghs2.png" alt="GHS2 Logo">
+        <div class="footer-logo">
+            <img src="ghs2.png" alt="GHS2 Logo">
+        </div>
     </div>
 
     <script>
